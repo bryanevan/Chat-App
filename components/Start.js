@@ -1,116 +1,204 @@
-import { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ImageBackground,
-} from "react-native";
+import React from 'react';
+import { View, Text, Button, TextInput,StyleSheet, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
+import Image from "../assets/back_image.png";
+const backgroundColors = {
+blue: '#69cfff',
+purple: '#474056',
+cyan: '#54ffd4',
+green: '#B9C6AE',
+};
 
-const Start = ({ navigation }) => {
-  const [text, setText] = useState("");
-  const [color, setColor] = useState("");
+export default class Start extends React.Component {
+constructor(props) {
+  super (props);
+  this.state={name: '', color:''}
+}
 
+render() {
   return (
-    <ImageBackground
-      source={require("../assets/back_image.png")}
-      resizeMode='cover'
-      style={styles.backgroundImage}
-    >
-      <View style={styles.container}>
-        <View style={styles.subContainer}>
-          <Text style={styles.title}>Chat App!</Text>
-        </View>
-        <View style={styles.subContainer}>
-          <TextInput
-            placeholder='Your name'
-            style={styles.input}
-            onChangeText={setText}
-          />
-          <Text>Choose Background Color</Text>
-          <View style={styles.radioButtonContainer}>
-            <TouchableOpacity
-              style={[styles.radioButton, { backgroundColor: "#ff5e5e" }]}
-              onPress={() => setColor("#ff5e5e")}
-            ></TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.radioButton, { backgroundColor: "#69cfff" }]}
-              onPress={() => setColor("#69cfff")}
-            ></TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.radioButton, { backgroundColor: "#54ffd4" }]}
-              onPress={() => setColor("#54ffd4")}
-            ></TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.radioButton, { backgroundColor: "#fff869" }]}
-              onPress={() => setColor("#fff869")}
-            ></TouchableOpacity>
+    <View style={styles.container}>
+      <ImageBackground
+        source={Image}
+        style={styles.image}
+      >
+        <Text style={styles.title}>Chat App</Text>
+        <View style={styles.startWrapper}>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              onChangeText={(name) => this.setState({ name })}
+              value={this.state.name}
+              placeholder="Your Name"
+            />
+          </View>
+          <View style={styles.colorWrapper}>
+            <Text style={styles.colorText}>Choose Background Color:</Text>
+            <View style={styles.colors}>
+              <TouchableOpacity
+                style={[
+                  styles.color,
+                  { backgroundColor: backgroundColors.blue },
+                ]}
+                onPress={() =>
+                  this.setState({ color: backgroundColors.blue })
+                }
+              />
+              <TouchableOpacity
+                style={[
+                  styles.color,
+                  { backgroundColor: backgroundColors.purple },
+                ]}
+                onPress={() =>
+                  this.setState({ color: backgroundColors.purple })
+                }
+              />
+              <TouchableOpacity
+                style={[
+                  styles.color,
+                  { backgroundColor: backgroundColors.cyan },
+                ]}
+                onPress={() =>
+                  this.setState({ color: backgroundColors.cyan })
+                }
+              />
+              <TouchableOpacity
+                style={[
+                  styles.color,
+                  { backgroundColor: backgroundColors.green },
+                ]}
+                onPress={() =>
+                  this.setState({ color: backgroundColors.green })
+                }
+              />
+            </View>
           </View>
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
-              navigation.navigate("Chat", {
-                name: text ? text : "User",
-                color: color ? color : "white",
+              this.props.navigation.navigate('Chat', {
+                name: this.state.name,
+                color: this.state.color,
               })
             }
+            accessible={true}
+            accessibilityLabel='Start chatting'
+            accessibilityHint='Enter the chat room, where you can send messages to your contacts.'
           >
-            <Text>Go to Chat</Text>
+            <Text style={styles.buttonText}>Start Chatting</Text>
           </TouchableOpacity>
         </View>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </View>
   );
-};
+}
+}
 
 const styles = StyleSheet.create({
-  backgroundImage: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  subContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    width: "88%",
-    
-  },
-  radioButtonContainer: {
-    width: "70%",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    margin: 20,
-  },
-  title: {
-    fontWeight: "bold",
-    fontSize: 30,
-    color: "white",
-  },
-  button: {
-    alignItems: "center",
-    backgroundColor: "#DDDDDD",
-    padding: 10,
-  },
-  radioButton: {
-    backgroundColor: "black",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-  },
-  input: {
-    height: 40,
-    width: "88%",
-    margin: 12,
-    borderWidth: 3,
-    borderColor: "white",
-    padding: 10,
-    color: "white"
-  },
-});
+container: {
+  flex: 1,
+},
 
-export default Start;
+image: {
+  flex: 1,
+  flexDirection: 'column',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  resizeMode: 'cover',
+  paddingVertical: '6%',
+},
+
+title: {
+  flex:1,
+  fontSize: 45,
+  fontWeight: '600',
+  color: '#FFFFFF',
+  paddingTop: '10%',
+  paddingBottom: 0,
+  marginBottom: 0,
+},
+
+startWrapper: {
+  flex: 2,
+  backgroundColor: 'clear',
+  maxHeight: '60%',
+  width: '88%',
+  alignItems: 'center',
+  justifyContent: 'space-evenly',
+},
+
+inputWrapper: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  borderColor: 'lightgrey',
+  opacity: 50,
+  height: 60,
+  width: '88%',
+  borderColor: 'lightgrey',
+  borderWidth: 2,
+  borderRadius: 5,
+  paddingLeft: 5,
+},
+
+icon: {
+  padding: 10,
+  margin: 5,
+  height: 20,
+  width: 20,
+  resizeMode: 'stretch',
+  alignItems: 'center',
+},
+
+input: {
+  fontSize: 16,
+  fontWeight: '600',
+  color: '#353839',
+  height: 60,
+  borderColor: 'rgba(0,0,0,0)',
+  borderWidth: 2,
+  borderRadius: 5,
+  position: 'absolute',
+  left: -2,
+  paddingLeft: 35,
+  paddingRight: 20,
+  width: '101%'
+},
+
+colorWrapper: {
+  width: '88%',
+  justifyContent: 'center',
+},
+
+colorText: {
+  fontSize: 16,
+  fontWeight: '300',
+  color: 'white',
+  opacity: 100,
+},
+
+colors: {
+  flexDirection: 'row',
+  justifyContent: 'space-between'
+},
+
+color: {
+  borderRadius: 20,
+  width: 40,
+  height: 40,
+  marginTop: '4%',
+  marginRight: 25,
+},
+
+button: {
+  height: 60,
+  width: '88%',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#757083',
+},
+
+buttonText: {
+  fontSize: 16,
+  fontWeight: '200',
+  color: 'cyan',
+},
+});
