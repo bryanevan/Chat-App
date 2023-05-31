@@ -3,31 +3,28 @@ import { useState } from "react";
 import {
   View,
   Text,
-  Button,
+  Alert,
   TextInput,
   StyleSheet,
   ImageBackground,
   TouchableOpacity,
-  onAuthStateChanged,
 } from "react-native";
 import { getAuth, signInAnonymously } from "firebase/auth";
-import { Alert } from "react-native";
 
 // An object of objects. When referenced in a "style" attribute, the backgroundColor is applied!
 const Start = ({ navigation }) => {
   // Set initial state for text and color inputs
-  const [text, setText] = useState("");
   const [color, setColor] = useState("");
   const auth = getAuth();
+  const [name, setName] = useState('');
 
   const bgColors = {
-    mint: { backgroundColor: "#36FFAD" },
-    blue: { backgroundColor: "#65CEFF" },
-    purple: { backgroundColor: "#9871EB" },
-    pink: { backgroundColor: "#FD77FF" },
+    color1: { backgroundColor: "#090C08" },
+    color2: { backgroundColor: "#474056" },
+    color3: { backgroundColor: "#8A95A5" },
+    color4: { backgroundColor: "#B9C6AE" },
   };
-
-  const { mint, blue, purple, pink } = bgColors;
+  const { color1, color2, color3, color4 } = bgColors;
 
   // Function to sign in the user anonymously
   const signInUser = () => {
@@ -35,8 +32,8 @@ const Start = ({ navigation }) => {
       .then((result) => {
         // Navigate to the Chat screen with user ID, name, and color
         navigation.navigate("Chat", {
-          userID: result.user.uid,
-          name: text ? text : "User",
+          uid: result.user.uid,
+          name: name,
           color: color ? color : "white",
         });
         Alert.alert("Signed in successfully!");
@@ -56,7 +53,7 @@ const Start = ({ navigation }) => {
       <View style={[styles.nameInput__container, styles.columnEvenlyCenter]}>
         <TextInput
           style={styles.nameInput__input}
-          onChangeText={setText}
+          onChangeText={setName}
           placeholder="Enter your Name"
         />
 
@@ -64,23 +61,23 @@ const Start = ({ navigation }) => {
           <Text style={styles.colorSelect__text}>Choose your Background:</Text>
           <View style={styles.colorSelect__dotsWrapper}>
             <TouchableOpacity
-              style={[styles.colorSelect__dot, mint]}
-              onPress={() => setColor("#36FFAD")}
+              style={[styles.colorSelect__dot, color1]}
+              onPress={() => setColor("#090C08")}
             />
 
             <TouchableOpacity
-              style={[styles.colorSelect__dot, blue]}
-              onPress={() => setColor("#65CEFF")}
+              style={[styles.colorSelect__dot, color2]}
+              onPress={() => setColor("#474056")}
             />
 
             <TouchableOpacity
-              style={[styles.colorSelect__dot, purple]}
-              onPress={() => setColor("#9871EB")}
+              style={[styles.colorSelect__dot, color3]}
+              onPress={() => setColor("#8A95A5")}
             />
 
             <TouchableOpacity
-              style={[styles.colorSelect__dot, pink]}
-              onPress={() => setColor("#FD77FF")}
+              style={[styles.colorSelect__dot, color4]}
+              onPress={() => setColor("#B9C6AE")}
             />
           </View>
         </View>

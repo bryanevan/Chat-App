@@ -1,40 +1,44 @@
 import { useEffect, useState } from "react";
-import { KeyboardAvoidingView, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Linking,
+  Platform,
+  View,
+} from "react-native";
 import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import {
-  collection,
   addDoc,
+  collection,
   onSnapshot,
-  query,
   orderBy,
+  query,
 } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import MapView from "react-native-maps";
+import CustomActions from "./CustomActions";
 
-const Chat = ({ isConnected, db, route, navigation }) => {
+
+const Chat = ({ isConnected, db, route, navigation, storage }) => {
   // Destructure the parameters from the route object
-  const { name, color, userID } = route.params;
-
+  const { name, color, uid } = route.params;
   // Set the initial state for messages
   const [messages, setMessages] = useState([]);
 
   let unsubMessages;
-
   useEffect(() => {
     // Set navigation options for the title
     navigation.setOptions({ title: name });
-
     // Check if connected to the internet
     if (isConnected === true) {
       if (unsubMessages) unsubMessages();
       unsubMessages = null;
-
       // Create a query to fetch messages from the Firestore collection
       const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
-
       // Subscribe to real-time updates using onSnapshot
       unsubMessages = onSnapshot(q, (docs) => {
         let newMessages = [];
-
         // Process each document and create a new message object
         docs.forEach((doc) => {
           newMessages.push({
@@ -43,7 +47,6 @@ const Chat = ({ isConnected, db, route, navigation }) => {
             createdAt: new Date(doc.data().createdAt.toMillis()),
           });
         });
-
         // Cache the messages and update the state
         cacheMessages(newMessages);
         setMessages(newMessages);
@@ -52,7 +55,6 @@ const Chat = ({ isConnected, db, route, navigation }) => {
       // Load cached messages if not connected
       loadCachedMessages();
     }
-
     // Clean up the subscription when the component unmounts
     return () => {
       if (unsubMessages) unsubMessages();
@@ -75,68 +77,80 @@ const Chat = ({ isConnected, db, route, navigation }) => {
   };
 
   // Add a new message to Firestore
-  const addMessagesItem = async (newMessage) => {
-    const newMessageRef = await addDoc(
-      collection(db, "messages"),
-      newMessage[0]
-    );
-    if (!newMessageRef.id) {
-      Alert.alert(
-        "There was an error sending your message. Please try again later"
-      );
-    }
-  };
-
-  // Handle sending a new message
   const onSend = (newMessages) => {
-    addMessagesItem(newMessages);
+    addDoc(collection(db, "messages"), newMessages[0])
   };
 
-  // Render the input toolbar if connected
+  // callback to pass to the GiftedChat InputToolbar property. Check the state of isConnected bool, if false, don't render text input toolbar.
   const renderInputToolbar = (props) => {
-    if (isConnected) {
-      return <InputToolbar {...props} />;
-    } else {
-      return null;
-    }
+    if (isConnected) return <InputToolbar {...props} />;
+     else return null;
   };
+
+  // callback function to be passed in the GiftedChat custom actions prop that returns a CustomAction component with relevant prop data. 
+  const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} uid={uid} {...props} />;
+  };
+
+  // a custom view for handling messages sent explicitly with a location property, which triggers Expos MapView component in the render/return. The location object is sent in a special getLocation handler in CustomActions.js
+  const renderCustomView = (props) => {
+  const { currentMessage } = props;
+  if (currentMessage.location) {
+    return (
+      <View style={{ borderRadius: 13, margin: 3 }}>
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          provider="google"
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+          onPress={() => {
+            if (Platform.OS === "android") {
+              Linking.openURL(
+                `geo:${currentMessage.location.latitude}, ${currentMessage.location.longitude}`
+              );
+            }
+          }}
+        />
+      </View>
+    );
+  }
+  return null;
+};
 
   // Customize the appearance of the message bubble
   const renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        textStyle={{
-          right: {
-            color:
-              (color === "white") | (color === "yellow") ? "black" : "white",
-          },
-        }}
-        wrapperStyle={{
-          right: {
-            backgroundColor: color,
-          },
-          left: {
-            backgroundColor: "#FFF",
-          },
-        }}
-      />
-    );
-  };
+    return <Bubble
+      {...props}
+      wrapperStyle={{
+        right: {
+          backgroundColor: "#333232"
+        },
+        left: {
+          backgroundColor: "#FFF"
+        }
+      }}
+    />
+  }
 
   // Render the Chat component
   return (
-    <View style={styles.container}>
+    <View style={[ styles.container, {backgroundColor: color} ]}>
       <GiftedChat
         style={styles.textingBox}
         messages={messages}
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
-        onSend={(messages) => onSend(messages)}
+        onSend={messages => onSend(messages)}
+        renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
         user={{
-          _id: userID,
+          _id: uid,
+          name,
         }}
-        name={{ name: name }}
       />
       {Platform.OS === "android" ? (
         <KeyboardAvoidingView behavior="height" />
